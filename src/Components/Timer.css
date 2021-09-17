@@ -1,0 +1,14 @@
+
+.stopWatch__numbers{
+    margin: 50px 0 200px 0;
+
+}
+.digits{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 3rem;
+    color:  #f5f5f5;
+}
+
+.mili-sec{
+    color:  #783B13;
+}

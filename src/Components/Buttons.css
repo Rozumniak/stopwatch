@@ -1,0 +1,18 @@
+
+.buttonGroup{
+    display: flex;
+    width: 100%;
+
+}
+.button{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    width: 100px;
+    height: 5vh;
+    border-radius: 14px;
+    margin: 0px 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f5f5f5;
+    background-color: #439081;
+}
