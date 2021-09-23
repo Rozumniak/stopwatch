@@ -1,88 +1,78 @@
-import './App.css';
-import React, {useState} from 'react';
+import {useState} from "react";
 import Timer from "./Components/Timer";
+import {interval} from "rxjs";
+import {map} from "rxjs/operators";
+import "./App.css";
 import Buttons from "./Components/Buttons";
 
-const StopWatch = () => {
-    const [isActive, setIsActive] = useState(false);
-    const [isPaused, setIsPaused] = useState(true);
-    const [time, setTime] = useState(0);
+const delay = 1000;
 
+function StopWatch() {
+    const [timer, setTimer] = useState(0);
+    const [diff, setDiff] = useState(0);
 
+    const [subscription, setSubscription] = useState("");
+    const [prevent, setPrevent] = useState(true);
 
-    const handleStart = () => {
-        setIsActive(true);
-        setIsPaused(false);
+    const onStartHandler = () => {
+        if (!subscription) {
+            const timerSubscription = interval(delay)
+                .pipe(map((v) => v + 1))
+                .subscribe((v) => {
+                    setTimer(v + diff);
+                });
+            setSubscription(timerSubscription);
+        } else {
+            subscription.unsubscribe();
+            setTimer(0);
+            setDiff(0);
+            setSubscription("");
+        }
     };
-    const handleStop = () =>{
-        setIsActive(false);
-        setIsPaused(true)
-        setTime(0);
-    }
-    const handlePauseResume = () => {
-        setIsPaused(true);
+
+    const onWaitHandler = (event) => {
+        if (prevent) {
+            setPrevent(false);
+            const timerInstance = setTimeout(function () {
+                setPrevent(true);
+                clearTimeout(timerInstance);
+            }, 300);
+        } else {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+
+            setDiff(timer);
+            setSubscription("");
+        }
     };
 
-    const handleReset = () => {
-        setTime(0);
+    const onResetHandler = () => {
+        if (subscription) {
+            subscription.unsubscribe();
+        }
+
+        const timerSubscription = interval(delay).subscribe((v) => {
+            setTimer(v);
+        });
+        setSubscription(timerSubscription);
     };
-    const toggleStart = () =>{
-        if (isActive === true && isPaused === false){
-            handleStop()
-        }
-        else {
-            handleStart()
-        }
-    }
-
-    const [isPauseClicked, setPauseClicked] = useState(false);
-    const [clickTime, setClickTime] = useState(0);
-
-    React.useEffect(() => {
-        let interval = null;
-
-        if (isPauseClicked === true) {
-            interval = setInterval(() => {
-                setClickTime((clickTime) => clickTime + 10);
-            }, 10);
-            } else {
-            clearInterval(interval);
-        }
-        return () => {
-            clearInterval(interval);
-        };
-    }, [isPauseClicked]);
-    const doubleClick = () =>{
-         setPauseClicked(true)
-        if (clickTime > 300){
-            setClickTime(0)
-            setPauseClicked(false)
-        }else if(clickTime<=300 && isPauseClicked){
-            handlePauseResume()
-            setPauseClicked(false)
-            setClickTime(0)
-        }
-
-    }
-
 
     return (
         <div className={"wrapper"}>
             <div className={"content"}>
                 <div className={"stopWatch"}>
-                    <Timer time={time} isActive={isActive} isPaused={isPaused} setTime={setTime}/>
-
+                    <Timer timer={timer ? timer : diff}/>
                     <Buttons
-                        active={isActive}
-                        isPaused={isPaused}
-                        handleReset={handleReset}
-                        toggleStart={toggleStart}
-                        doubleClick={doubleClick}
+                        handleReset={onResetHandler}
+                        toggleStart={onStartHandler}
+                        doubleClick={onWaitHandler}
                     />
+
                 </div>
             </div>
-
-        </div>);
+        </div>
+    );
 }
 
 export default StopWatch;
